@@ -1,0 +1,101 @@
+import itertools, math 
+import re
+
+################################################################
+# DATA INPUT by a separated .txt file 
+# Presentation of data as in preflib.org: each line has the form p: c1, c2, c3, ... 
+# where p is the number of votes with ranking c1 > c2 > c3 > ...
+# Voting profile example with 5 alternatives, 20 votes, 2 different rankings 
+# 11: 4,5
+# 9: 5,4,2,3,1
+# ENTER 'file name.txt' to LINE 29 # 
+# ENTER the number of alternatives n to LINE 24 # 
+################################################################
+
+################################################################
+# Real-world data source : www.preflib.org # 
+# the data (change to .txt file) is obtained from www.preflib.org by removing the all preamble in each dataset # 
+# ENTER 'file name.txt' to LINE 29 # 
+# ENTER the number of alternatives n to LINE 24 # 
+################################################################  
+
+############################## 
+# n = numbers of alternatives #
+n = 9
+
+##############################
+# election input # 
+
+with open('2007 Scotland Newlands Ward.txt') as f:
+    lines = [line.rstrip() for line in f]
+# k = number of distinct rankings # 
+k = len(lines)
+# coeff = list of number of votes for each ranking in the list ranking # 
+coeff = [0 for i in range(k)]
+# all unranked alternatives in a vote equally occupy the last position, i.e., n-th position # 
+ranking = [[n for m in range(n)] for i in range (k)]
+for i in range(k):
+    L = lines[i].split(': ',1)
+    coeff[i] = int(L[0])
+    r = [int(j) for j in L[1].split(',')]
+    for m in range(len(r)):
+        ranking[i][r[m]-1] = m + 1
+
+##############################
+# computation of delta, Q # 
+delta = [[0 for x in range(n)] for y in range (n)]
+P = [[[0 for x in range(n)] for y in range (n)] for z in range(n)]
+Q = [[[0 for x in range(n)] for y in range (n)] for z in range(n)]
+
+for x, y in itertools.permutations(range(n), 2):
+    for i in range(k):
+        if ranking[i][x] < ranking[i][y]: 
+            delta[x][y] += coeff[i]
+        if ranking[i][x] > ranking[i][y]: 
+            delta[x][y] += - coeff[i]
+
+for x, y, z in itertools.permutations(range(n), 3):
+    for i in range(k):
+        u = min(ranking[i][x],ranking[i][y],ranking[i][z])
+        v = max(ranking[i][x],ranking[i][y],ranking[i][z])
+        
+        if u != v:
+            if ranking[i][x] == u:
+                Q[x][y][z] += coeff[i]
+
+            if ranking[i][y] == u:
+                Q[x][y][z] += - coeff[i]
+                    
+                    
+##############################
+# computation of good pairs #
+# S(y,x,z,t) = Q(y,z,t) + Q(z,x,t) # 
+# P(x,y,z) = delta(x,z) + delta(z,y) + Q(x,y,z) + Q(z,y,x) #
+L = []
+for x, y in itertools.permutations(range(n), 2): 
+    if delta[x][y] > 0: 
+        good = True
+        total = 0
+        for z in range(n): 
+            if (z!=x) and (z!=y):
+                if Q[x][y][z] < 0:
+                    good = False
+                    break
+
+        if good == True:
+            for z in range(n): 
+                partial = - (delta[x][z] + delta[z][y] + Q[x][y][z] + Q[z][y][x])
+                if (z!=x) and (z!=y):
+                    for t in range(n): 
+                         if (t!=x) and (t!=y) and (t!=z):
+                                partial += max(0, Q[y][z][t] + Q[z][x][t])
+                    total += max(0,partial)
+            if 2*delta[x][y] > total:
+                L.append((x+1,y+1)) 
+
+##############################
+# Results #
+print('Number of good pairs found by the 3-wise Major Order Theorem: ') 
+print(f'{len(L)}/{int(n*(n-1)/2)}')
+print('List of good pairs:') 
+print(L)
