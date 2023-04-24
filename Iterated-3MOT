@@ -2,20 +2,22 @@ import itertools, math
 import re 
 
 ################################################################
-# Data input format (.txt) = format used by preflib.org #
-# Each line has the form p: c1, c2, c3, ... where p is the number of votes with ranking c1 > c2 > c3 > ...
-# Voting profile example 
+# DATA INPUT by a separated .txt file 
+# Presentation of data as in preflib.org: each line has the form p: c1, c2, c3, ... 
+# where p is the number of votes with ranking c1 > c2 > c3 > ...
+# Voting profile example with 5 alternatives, 20 votes, 2 different rankings 
 # 11: 4,5
 # 9: 5,4,2,3,1
-# Must enter 'file name.txt' to line 27 # 
+# ENTER 'file name.txt' to LINE 29 # 
+# ENTER the number of alternatives n to LINE 24 # 
 ################################################################
 
 ################################################################
-# For real-world data source : www.preflib.org # 
-# the data (txt file) is obtained from www.preflib.org by removing the all preamble in each dataset # 
-# enter 'file name.txt' to line 27 # 
+# REAL-WORLD DATAT source: www.preflib.org # 
+# the data (change to .txt file) is obtained from www.preflib.org by removing the all preamble in each dataset # 
+# ENTER 'file name.txt' to LINE 29 # 
+# ENTER the number of alternatives n to LINE 24 # 
 ################################################################  
-
 
 ################################################################ 
 # n = numbers of alternatives, repeat = number of iterations #
