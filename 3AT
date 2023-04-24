@@ -1,0 +1,68 @@
+# Result-Uniform-Proportion-pairs-Extended 3-wise Always Theorems (3AT) # 
+#############################################################################
+
+import itertools, math 
+import re
+# generate random integer values
+from random import seed, randint 
+# seed random number generator
+seed(1)
+
+##############################
+# Parameters #
+# n = numbers of alternatives > 2 # ENTER THE NUMBER OF ALTERNATIVES n AT LINE 14  
+n = 20
+# m = numbers of votes # ENTER THE RANGE FOR m AT LINE 19  
+# repeat = number of iterations for the stats # 
+repeat = 1000
+
+for m in range(15,16):
+    ##############################
+    # some induced constants #
+    # threshold3 = g(n) in Extended 3-wise Always Theorem #
+    threshold3 = m - m/(n*n - 3*n + 4)
+
+
+    ##############################
+    alpha3 = 0 
+
+    ##############################
+    def trans_closure(U):
+        for i in range(n-2):
+            for x, z in itertools.permutations(range(n), 2):
+                if (x,z) not in U:
+                    for y in range(n):
+                        if (y!=x) and (y!=z): 
+                            if ((x,y) in U) and ((y,z) in U):
+                                U.append((x,z))
+
+    ##############################
+    # uniform simulation of elections V with m votes over n candiates # 
+
+    for rep in range(repeat):
+        L3 = []
+        V = []
+        for i in range(m):
+            P = [j for j in range(n)]
+            Q = []
+            for k in range(n):
+                Q.append(P.pop(randint(0,n-k-1)))
+            V.append(Q)
+
+        for x, y in itertools.combinations(range(n),2):
+            count = 0
+            for i in range(m):
+                if V[i][x] < V[i][y]:
+                    count += 1
+            if count > threshold3:
+                L3.append((x,y))
+            if count < m - threshold3:
+                L3.append((y,x))
+                
+        alpha3 +=len(L3)
+
+
+    ##############################
+    # Results # 
+ 
+    print(f'(n={int(n)},m={int(m)},size={int(repeat)}), results=({round(200*alpha3/repeat/n/(n-1),5)}%)')
