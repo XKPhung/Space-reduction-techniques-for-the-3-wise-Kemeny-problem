@@ -16,3 +16,5 @@ VI. Result-Uniform-Proportion-pairs-3MOTe (Table 3, Table 4)
 VII. Result-Uniform-Proportion-pairs-Iterated-3MOT (Table 3, Table 4)
 
 VIII. 3AT (3-wise Extened Always Theorem, Table 3, Table 4)
+
+IX. Lemma-21  
