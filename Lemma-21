@@ -1,0 +1,68 @@
+### Lemma 21 = True if the optimal objective value is 0 ### 
+
+import itertools, math 
+from pulp import *
+
+#############################################
+# n is the number of candidates 
+n = 4 
+
+#############################################
+# Axiliary variables #
+#############################################
+# the list C of 4 candidates x=0, y=1, z=2, t=3 
+C = list(range(n))
+
+# the list S of all rankings: r[j] is the position of the candidate j in the ranking r
+rankings = list([*(itertools.permutations(C, n))])
+S = list(range(math.factorial(n)))
+for i in range(math.factorial(n)):
+    S[i] = list(rankings[i])
+
+#############################################
+# Lists of rankings for the objective function  
+I1, I2, I3, I4 = [], [] ,[] , [] 
+#############################################
+# Lists of rankings for the 3/4 constraints 
+J1, J2, J3 = [], [] , [] 
+
+# m denotes in the index of the ranking in the list S 
+for m in range(math.factorial(n)):
+    if S[m][1] < S[m][0] and S[m][1] < S[m][3]:
+        I1.append(m) 
+    if S[m][0] < S[m][1] and S[m][0] < S[m][3]:
+        I2.append(m) 
+    if S[m][1] < S[m][2] and S[m][1] < S[m][3]:
+        I3.append(m) 
+    if S[m][2] < S[m][1] and S[m][2] < S[m][3]:
+        I4.append(m) 
+    if S[m][2] < S[m][0]:
+        J1.append(m) 
+    if S[m][0] < S[m][1]:
+        J2.append(m) 
+    if S[m][0] < S[m][3]:
+        J3.append(m) 
+
+###############################################
+# LP algo #
+###############################################
+model = LpProblem("Lemma_21", LpMaximize) 
+
+# Create variables #     
+# list c of coeffcients of each ranking in the voting profile V
+c = {i: LpVariable(name=f"c{i}", lowBound=0) for i in range(0, math.factorial(n))} 
+
+# Create maximize objective function # 
+model +=  lpSum(c[m] for m in I1) - lpSum(c[m] for m in I2) + lpSum(c[m] for m in I3) - lpSum(c[m] for m in I4)
+
+# Create constraints # 
+# normalization: sum of all c[i] is 1
+model += lpSum(c[m] for m in range(0, math.factorial(n))) == 1
+
+# 3/4 constraints 
+model += lpSum(c[m] for m in J1) >= 3/4 
+model += lpSum(c[m] for m in J2) >= 3/4 
+model += lpSum(c[m] for m in J3) >= 3/4 
+
+# The problem is solved using PuLP's choice of Solver
+model.solve()
