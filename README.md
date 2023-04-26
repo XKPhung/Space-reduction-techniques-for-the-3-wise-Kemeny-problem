@@ -18,3 +18,7 @@ VII. Result-Uniform-Proportion-pairs-Iterated-3MOT (Table 3, Table 4)
 VIII. 3AT (3-wise Extened Always Theorem, Table 3, Table 4)
 
 IX. Lemma-21  
+
+X. Lemma-9-xzt (estimation for the contribution of {x,z,t} to Delta_c)
+
+XI. Lemma-9-yzt (estimation for the contribution of {y,z,t} to Delta_c) 
