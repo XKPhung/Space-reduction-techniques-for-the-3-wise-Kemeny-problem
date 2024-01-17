@@ -23,6 +23,6 @@ X. Lemma-9-xzt (estimation for the contribution of {x,z,t} to Delta_c)
 
 XI. Lemma-9-yzt (estimation for the contribution of {y,z,t} to Delta_c) 
 
-XII. Result-Uniform-Proportion-pairs-Improved-Iterated-MOT-vs-Iterated-MOT
+XII. Result-Uniform-Proportion-pairs-Improved-Iterated-MOT-vs-Iterated-MOT (Table 5)
 
-XIII. Result-Mallows-Proportion-pairs-Improved-Iterated-MOT-vs-Iterated-MOT
+XIII. Result-Mallows-Proportion-pairs-Improved-Iterated-MOT-vs-Iterated-MOT (Table 6)
