@@ -1,0 +1,169 @@
+# Result-Uniform-Proportion-pairs-Improved-Iterated-MOT-vs-Iterated-MOT-on-same-data # 
+##################################################################
+import itertools, math 
+import re
+# generate random integer values
+from random import seed, randint 
+# seed random number generator
+seed(1)
+
+##############################
+# Parameters #
+# n = numbers of alternatives > 2 #
+n = 5
+# m = numbers of votes #
+# m = 4
+# repeat = number of iterations for the stats # 
+repeat = 10000
+# count = number of elections where 3MOT applicable # 
+
+##############################
+# function transitivity closure of a list of pairs # 
+# repeat n-2 times to obtain all induced pairs, e.g., (x_1,x_2),...,(x_{n-1},x_n) to have (x_1,x_n) # 
+def trans_closure(U):
+    for i in range(n-2):
+        for x, z in itertools.permutations(range(n), 2):
+            if (x,z) not in U:
+                for y in range(n):
+                    if (y!=x) and (y!=z): 
+                        if ((x,y) in U) and ((y,z) in U):
+                            U.append((x,z))
+
+##############################
+# computation of the updated A, T for improved iterated 2MOT#
+def Aset(U,L):
+    for x, z in itertools.permutations(range(n), 2):
+        if (z,x) in L:
+            U[x].append(z)
+
+def Tset(U,L):
+    for x, z in itertools.permutations(range(n), 2):
+        if (x,z) in L: 
+            U[x].append(z)
+            
+            
+##############################
+# computation of the updated A2, T2 for non-improved iterated 2MOT#
+def Aset2(U,L):
+    for x, z in itertools.permutations(range(n), 2):
+        if (z,x) in L:
+            for y in range(n):
+                if y != x:
+                    if (z,y) in L: 
+                        U[x][y].append(z)
+
+def Tset2(U,L):
+    for x, z in itertools.permutations(range(n), 2):
+        if (x,z) in L: 
+            for y in range(n):
+                if y != x:
+                    if (x,z) in L:
+                        U[x][y].append(z)
+
+
+############################## 
+
+count3 = 0 # number of more pairs by Improved Iterated 2MOT
+
+############################## 
+for m in range(5,6):
+    ##############################
+    # computation of good pairs #
+    # S(y,x,z,t) = Q(y,z,t) + Q(z,x,t) # 
+    # P(x,y,z) = delta(x,z) + delta(z,y) + Q(x,y,z) + Q(z,y,x) #
+    count = 0 # pairs found by Improved Iterated 2MOT
+    count2 = 0 # pairs found by Original Iterated 2MOT 
+    iteration = 0
+    iteration2 = 0
+    
+    for rep in range(repeat): 
+        V = []
+        for i in range(m):
+            H = [j for j in range(n)]
+            K = []
+            for k in range(n):
+                K.append(H.pop(randint(0,n-k-1)))
+            V.append(K)
+
+        delta = [[0 for x in range(n)] for y in range (n)]
+        P = [[[0 for x in range(n)] for y in range (n)] for z in range(n)]
+        Q = [[[0 for x in range(n)] for y in range (n)] for z in range(n)]
+
+        for x, y in itertools.permutations(range(n), 2):
+            for i in range(m):
+                if V[i][x] < V[i][y]: 
+                    delta[x][y] += 1
+                if V[i][x] > V[i][y]: 
+                    delta[x][y] += - 1
+
+        for x, y, z in itertools.permutations(range(n), 3):
+            for i in range(m):
+                u = min(V[i][x],V[i][y],V[i][z])
+                v = max(V[i][x],V[i][y],V[i][z])
+
+                if u != v:
+                    if V[i][x] == u:
+                        Q[x][y][z] += 1
+
+                    if V[i][y] == u:
+                        Q[x][y][z] += - 1
+
+
+        A = [[] for x in range (n)]
+        T = [[] for x in range (n)]
+        number = -1 
+        i = 0 
+        L = [] 
+         
+        while number < len(L):
+            i += 1
+            number = len(L)
+            if i > 1:        
+                Aset(A,L) 
+                Tset(T,L) 
+            for x, y in itertools.permutations(range(n), 2): 
+                if (delta[x][y] > 0) and ((x,y) not in L): 
+                    total = 0
+                    for z in range(n): 
+                        if (z!=x) and (z!=y) and (z not in A[y]) and (z not in T[x]): 
+                            partial = delta[y][z] + delta[z][x]
+                            total += max(0,partial) 
+                    if 2*delta[x][y] > total:
+                        L.append((x,y)) 
+            trans_closure(L)
+            
+        count += len(L)
+        iteration += i 
+        
+        A2 = [[[] for x in range (n)] for y in range(n)]
+        T2 = [[[] for x in range (n)] for y in range(n)]
+        number2 = -1 
+        i2 = 0 
+        L2 = []
+              
+        while number2 < len(L2):
+            i2 += 1
+            number2 = len(L2)
+            if i2 > 1: 
+                Aset2(A2,L2) 
+                Tset2(T2,L2) 
+            for x, y in itertools.permutations(range(n), 2):
+                if (delta[x][y] > 0) and ((x,y) not in L2):
+                    total = 0
+                    for z in range(n):
+                        if (z!=x) and (z!=y) and (z not in A2[x][y]) and (z not in T2[x][y]):
+                            partial = delta[y][z] + delta[z][x]
+                            total += max(0,partial)
+                    if 2*delta[x][y] > total:
+                        L2.append((x,y))
+            
+        trans_closure(L2)
+        count2 += len(L2)
+        iteration2 += i2
+        count3 = max(count3, len(L)-len(L2))
+
+    ##############################
+    # Results # 
+    print(f'(n={int(n)},m={int(m)},size={int(repeat)}), Improved Iterated 2MOT found {round(100*count/(repeat*n*(n-1)/2),2)}% pairs with {round(iteration/(repeat),2)} iterations')
+    print(f'(n={int(n)},m={int(m)},size={int(repeat)}), Original Iterated 2MOT found {round(100*count2/(repeat*n*(n-1)/2),2)}% pairs with {round(iteration2/(repeat),2)} iterations')
+    print(f'(n={int(n)},m={int(m)},size={int(repeat)}), There is an instance where Improved Iterated 2MOT found {round(100*count3/(n*(n-1)/2),2)}% more pairs than Original Iterated 2MOT')
